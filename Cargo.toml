@@ -1,0 +1,29 @@
+[package]
+description = "不可描述的功能"
+edition     = "2024"
+name        = "crack"
+version     = "0.1.0"
+rust-version = "1.85.0"
+
+[dependencies]
+anyhow      = { version = "1.0.93", features = ["backtrace"] }
+base64      = { version = "0.22.1" }
+clap        = { version = "4.5.26", features = ["derive"] }
+futures     = { version = "0.3" }
+lazy_static = { version = "1.5.0" }
+num-bigint  = { version = "0.4.6" }
+openssl     = { version = "0.10" }
+regex       = { version = "1.11.1" }
+reqwest     = { version = "0.12.9", features = ["blocking", "json"] }
+serde       = { version = "1.0", features = ["derive"] }
+serde_json  = { version = "1.0" }
+thiserror   = { version = "2.0.11" }
+tokio       = { version = "1.41", features = ["full"] }
+zip         = { version = "2.2.0" }
+
+[profile.release]
+codegen-units = 1
+lto           = true
+opt-level     = "z"
+panic         = "abort"
+strip         = true
