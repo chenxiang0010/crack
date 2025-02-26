@@ -9,13 +9,13 @@ lazy_static! {
         VARIANT_BASE64_TABLE
             .chars()
             .enumerate()
-            .collect::<HashMap<_, _>>()
+            .collect()
     };
     pub(crate) static ref VARIANT_BASE64_REVERSE_DICT: HashMap<char, usize> = {
         VARIANT_BASE64_TABLE
             .chars()
             .enumerate()
             .map(|(i, c)| (c, i))
-            .collect::<HashMap<_, _>>()
+            .collect()
     };
 }

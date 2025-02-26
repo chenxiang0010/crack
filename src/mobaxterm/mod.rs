@@ -3,9 +3,8 @@ mod encrypt;
 pub mod util;
 
 use crate::config::MobaXterm;
-use encrypt::encrypt;
 
 pub fn run(config: &MobaXterm) -> anyhow::Result<()> {
-    encrypt(config)?;
+    encrypt::encrypt(config)?;
     Ok(())
 }

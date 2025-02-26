@@ -12,7 +12,12 @@ pub enum CliError {
 
 /// 不可描述的功能
 #[derive(Debug, Parser)]
-#[command(version,about,long_about = None)]
+#[command(
+  version,
+  about,
+  long_about = None,
+  disable_help_subcommand = true,
+)]
 pub struct Cli {
     #[clap(subcommand)]
     pub command: Command,
