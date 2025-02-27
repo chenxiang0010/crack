@@ -1,7 +1,7 @@
 use super::constant::VARIANT_BASE64_DICT;
-use super::util::{encrypt_decrypt_bytes, LicenseType};
+use super::util::encrypt_decrypt_bytes;
 use crate::config::MobaXterm;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs::{self, File};
@@ -68,7 +68,7 @@ fn process_block_encode(
 fn variant_base64_encode(bytes: &[u8]) -> Vec<u8> {
     let capacity = (bytes.len() * 4 + 2) / 3;
     let mut result = Vec::with_capacity(capacity);
-    bytes.chunks(3).for_each(|chunk| {
+    for chunk in bytes.chunks(3) {
         let block = process_block_encode(
             chunk.as_ptr() as usize - bytes.as_ptr() as usize,
             chunk.len(),
@@ -76,7 +76,7 @@ fn variant_base64_encode(bytes: &[u8]) -> Vec<u8> {
             bytes,
         );
         result.extend_from_slice(&block);
-    });
+    }
     result
 }
 
@@ -88,7 +88,7 @@ fn build_license_code(config: &MobaXterm) -> anyhow::Result<Vec<u8>> {
         count,
     } = config;
     let (major, minor) = parse_version(version)?;
-    let license_type = LicenseType::to_id(license_type);
+    let license_type = license_type.to_int();
     let license_string =
         format!("{license_type}#{username}|{major}{minor}#{count}#{major}3{minor}6{minor}#0#0#0#");
     let encrypted_code = encrypt_decrypt_bytes(&mut 0x787, &license_string.into_bytes(), true);

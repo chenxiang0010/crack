@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 pub(crate) fn encrypt_decrypt_bytes(key: &mut u16, bytes: &[u8], encrypt: bool) -> Vec<u8> {
     bytes
@@ -25,7 +24,7 @@ pub enum LicenseType {
 }
 
 impl LicenseType {
-    pub fn to_id(&self) -> u8 {
+    pub fn to_int(&self) -> u8 {
         match self {
             LicenseType::Professional => 1,
             LicenseType::Educational => 3,
@@ -42,8 +41,8 @@ impl LicenseType {
     }
 }
 
-impl fmt::Display for LicenseType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for LicenseType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
