@@ -1,6 +1,6 @@
 use super::constant::{CODE_FILE_PATH, PLUGIN_API_BASE, PRODUCT_API};
 use anyhow::Result;
-use futures::{stream::FuturesUnordered, StreamExt};
+use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs::{self, File};
@@ -44,19 +44,21 @@ async fn load_plugin() -> Result<String, CodeError> {
     )?;
     let mut plugins = paid?;
     plugins.extend(freemium?);
-    let mut futures = FuturesUnordered::new();
-    for plugin in plugins {
-        if let Some(id) = plugin["id"].as_i64() {
-            futures.push(tokio::spawn(fetch_plugin_details(id.to_string())));
-        }
-    }
-    let mut codes = Vec::new();
-    while let Some(result) = futures.next().await {
-        match result? {
-            Ok(detail) => codes.push(detail.purchase_info.product_code),
-            Err(e) => eprintln!("Error fetching plugin details: {:?}", e),
-        }
-    }
+    let codes = futures::stream::iter(plugins)
+        .filter_map(|plugin| async move { plugin["id"].as_i64().map(|id| id.to_string()) })
+        .map(fetch_plugin_details)
+        .buffer_unordered(10) // 限制并发数
+        .filter_map(|result| async move {
+            match result {
+                Ok(detail) => Some(detail.purchase_info.product_code),
+                Err(e) => {
+                    eprintln!("获取插件详情失败: {:?}", e);
+                    None
+                }
+            }
+        })
+        .collect::<Vec<_>>()
+        .await;
     Ok(codes.join(","))
 }
 

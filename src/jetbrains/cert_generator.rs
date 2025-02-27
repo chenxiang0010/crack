@@ -5,7 +5,7 @@ use openssl::hash::MessageDigest;
 use openssl::nid::Nid;
 use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
-use openssl::x509::{X509NameBuilder, X509ReqBuilder, X509};
+use openssl::x509::{X509, X509NameBuilder, X509ReqBuilder};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -21,8 +21,10 @@ pub enum CertError {
 }
 
 pub fn generate_and_save_cert() -> Result<(), CertError> {
-    if Path::new(CA_CERT_FILE_PATH).exists() && Path::new(CA_KEY_FILE_PATH).exists() {
-        eprintln!("Certificate already exists");
+    if [CA_CERT_FILE_PATH, CA_KEY_FILE_PATH]
+        .iter()
+        .all(|item| Path::new(item).exists())
+    {
         return Ok(());
     }
     let (cert, priv_key_pem) = generate_self_signed_cert()?;

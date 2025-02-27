@@ -5,11 +5,10 @@ mod mobaxterm;
 mod utils;
 
 use config::Config;
-use std::process;
 
 fn exit_with_error(e: impl std::fmt::Display) -> ! {
     eprintln!("{}", e);
-    process::exit(1);
+    std::process::exit(1);
 }
 
 #[tokio::main]
