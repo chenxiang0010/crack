@@ -4,7 +4,7 @@ use crate::config::MobaXterm;
 use anyhow::{Context, anyhow};
 use regex::Regex;
 use std::collections::HashMap;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use zip::write::FileOptions;
@@ -12,11 +12,6 @@ use zip::{CompressionMethod, ZipWriter};
 
 fn build_zip(license: &[u8]) -> anyhow::Result<()> {
     let output_path = Path::new("output/mobaxterm/Custom.mxtpro");
-    if let Some(parent) = output_path.parent() {
-        if !parent.exists() {
-            fs::create_dir_all(parent).context("Failed to create output directory")?;
-        }
-    }
     let file = File::create(output_path).context("Failed to create ZIP file")?;
     let mut zip_file = ZipWriter::new(file);
     let options = FileOptions::<()>::default().compression_method(CompressionMethod::Stored);
