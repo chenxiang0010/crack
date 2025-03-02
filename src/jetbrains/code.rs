@@ -1,4 +1,4 @@
-use super::constant::{CODE_FILE_PATH, PLUGIN_API_BASE, PRODUCT_API};
+use super::constant::{CODE_FILE_PATH, HTTP_CLIENT, PLUGIN_API_BASE, PRODUCT_API};
 use anyhow::Result;
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,9 @@ pub enum CodeError {
 
 async fn load_product() -> Result<String, CodeError> {
     let url = format!("{}?fields=code", PRODUCT_API);
-    let resp: Vec<String> = reqwest::get(url)
+    let resp: Vec<String> = HTTP_CLIENT
+        .get(&url)
+        .send()
         .await?
         .json::<Vec<ProductInfo>>()
         .await?
@@ -42,12 +44,13 @@ async fn load_plugin() -> Result<String, CodeError> {
         tokio::spawn(fetch_plugins("PAID")),
         tokio::spawn(fetch_plugins("FREEMIUM"))
     )?;
-    let mut plugins = paid?;
-    plugins.extend(freemium?);
-    let codes = futures::stream::iter(plugins)
+    let paid_stream = futures::stream::iter(paid?.into_iter());
+    let freemium_stream = futures::stream::iter(freemium?.into_iter());
+    let plugins_stream = paid_stream.chain(freemium_stream);
+    let codes = plugins_stream
         .filter_map(|plugin| async move { plugin["id"].as_i64().map(|id| id.to_string()) })
         .map(fetch_plugin_details)
-        .buffer_unordered(10) // 限制并发数
+        .buffer_unordered(15)
         .filter_map(|result| async move {
             match result {
                 Ok(detail) => Some(detail.purchase_info.product_code),
@@ -67,9 +70,7 @@ async fn fetch_plugins(pricing_model: &str) -> Result<Vec<Value>, CodeError> {
         "{}/searchPlugins?max=10000&offset=0&pricingModels={}",
         PLUGIN_API_BASE, pricing_model
     );
-    let res = reqwest::get(&url).await?;
-    let text = res.text().await?;
-    let data: Value = serde_json::from_str(&text).map_err(CodeError::PluginParse)?;
+    let data: Value = HTTP_CLIENT.get(&url).send().await?.json().await?;
     data["plugins"]
         .as_array()
         .ok_or_else(|| CodeError::ApiError("Invalid plugin list format".to_string()))
@@ -89,11 +90,8 @@ struct PurchaseInfo {
 }
 
 async fn fetch_plugin_details(id: String) -> Result<PluginDetail, CodeError> {
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(10))
-        .build()?;
     let url = format!("{}/plugins/{}", PLUGIN_API_BASE, id);
-    let res = client.get(&url).send().await?;
+    let res = HTTP_CLIENT.get(&url).send().await?;
     let detail: PluginDetail = serde_json::from_str(&res.text().await?)?;
     Ok(detail)
 }

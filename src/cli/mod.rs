@@ -4,9 +4,9 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug, thiserror::Error)]
 pub enum CliError {
-    #[error("Mobaxterm error: {0}")]
+    #[error("MobaXterm 错误: {0}")]
     Mobaxterm(String),
-    #[error("Jetbrains error: {0}")]
+    #[error("JetBrains 错误: {0}")]
     Jetbrains(String),
 }
 

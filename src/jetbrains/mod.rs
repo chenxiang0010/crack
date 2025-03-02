@@ -29,5 +29,6 @@ pub async fn run(config: &JetBrains) -> anyhow::Result<()> {
     }
     inject::inject()?;
     generate_license(config).await?;
+    println!("Generation successful! Please copy the 'license.txt' and 'power.conf' to your IDE.");
     Ok(())
 }

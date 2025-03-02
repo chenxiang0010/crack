@@ -1,3 +1,6 @@
+use lazy_static::lazy_static;
+use std::time::Duration;
+
 pub(crate) const ROOT_CERTIFICATE: &str = r#"
 -----BEGIN CERTIFICATE-----
 MIIFOzCCAyOgAwIBAgIJANJssYOyg3nhMA0GCSqGSIb3DQEBCwUAMBgxFjAUBgNV
@@ -38,3 +41,10 @@ pub(crate) const LICENSE_FILE_PATH: &str = "output/jetbrains/license.txt";
 pub(crate) const POWER_FILE_PATH: &str = "output/jetbrains/power.conf";
 pub(crate) const PLUGIN_API_BASE: &str = "https://plugins.jetbrains.com/api";
 pub(crate) const PRODUCT_API: &str = "https://data.services.jetbrains.com/products";
+
+lazy_static! {
+    pub(crate) static ref HTTP_CLIENT: reqwest::Client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .build()
+        .expect("Failed to create HTTP client");
+}

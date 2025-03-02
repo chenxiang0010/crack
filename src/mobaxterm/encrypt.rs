@@ -61,17 +61,15 @@ fn process_block_encode(
 }
 
 fn variant_base64_encode(bytes: &[u8]) -> Vec<u8> {
-    let capacity = (bytes.len() * 4 + 2) / 3;
-    let mut result = Vec::with_capacity(capacity);
-    for chunk in bytes.chunks(3) {
-        let block = process_block_encode(
-            chunk.as_ptr() as usize - bytes.as_ptr() as usize,
-            chunk.len(),
-            &VARIANT_BASE64_DICT,
-            bytes,
-        );
+    let result_len = (bytes.len() * 4 + 2) / 3;
+    let mut result = Vec::with_capacity(result_len);
+
+    for i in (0..bytes.len()).step_by(3) {
+        let chunk_size = std::cmp::min(3, bytes.len() - i);
+        let block = process_block_encode(i, chunk_size, &VARIANT_BASE64_DICT, bytes);
         result.extend_from_slice(&block);
     }
+
     result
 }
 
