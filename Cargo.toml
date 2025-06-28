@@ -18,8 +18,8 @@ reqwest     = { version = "0.12.9", features = ["json"], default-features = fals
 serde       = { version = "1.0", features = ["derive"] }
 serde_json  = { version = "1.0" }
 thiserror   = { version = "2.0.11" }
-tokio       = { version = "1.41", features = ["rt-multi-thread", "macros"] }
-zip         = { version = "2.2.3" }
+tokio       = { version = "1.41", features = ["macros", "rt-multi-thread"] }
+zip         = { version = "4.2.0" }
 
 [profile.release]
 codegen-units = 1

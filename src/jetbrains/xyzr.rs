@@ -26,5 +26,5 @@ pub fn load_power_conf() -> Result<String> {
     let mut ctx = BigNumContext::new()?;
     let mut r = BigNum::new()?;
     r.mod_exp(&signature, rsa.e(), rsa.n(), &mut ctx)?;
-    Ok(format!("[Result]\nEQUAL,{},{},{}->{}", x, y, z, r))
+    Ok(format!("[Result]\nEQUAL,{x},{y},{z}->{r}"))
 }

@@ -7,7 +7,7 @@ mod utils;
 use config::Config;
 
 fn exit_with_error(e: impl std::fmt::Display) -> ! {
-    eprintln!("{}", e);
+    eprintln!("{e}");
     std::process::exit(1);
 }
 

@@ -26,7 +26,7 @@ pub enum CodeError {
 }
 
 async fn load_product() -> Result<String, CodeError> {
-    let url = format!("{}?fields=code", PRODUCT_API);
+    let url = format!("{PRODUCT_API}?fields=code");
     let resp: Vec<String> = HTTP_CLIENT
         .get(&url)
         .send()
@@ -55,7 +55,7 @@ async fn load_plugin() -> Result<String, CodeError> {
             match result {
                 Ok(detail) => Some(detail.purchase_info.product_code),
                 Err(e) => {
-                    eprintln!("获取插件详情失败: {:?}", e);
+                    eprintln!("获取插件详情失败: {e:?}");
                     None
                 }
             }
@@ -66,10 +66,8 @@ async fn load_plugin() -> Result<String, CodeError> {
 }
 
 async fn fetch_plugins(pricing_model: &str) -> Result<Vec<Value>, CodeError> {
-    let url = format!(
-        "{}/searchPlugins?max=10000&offset=0&pricingModels={}",
-        PLUGIN_API_BASE, pricing_model
-    );
+    let url =
+        format!("{PLUGIN_API_BASE}/searchPlugins?max=10000&offset=0&pricingModels={pricing_model}");
     let data: Value = HTTP_CLIENT.get(&url).send().await?.json().await?;
     data["plugins"]
         .as_array()
@@ -90,7 +88,7 @@ struct PurchaseInfo {
 }
 
 async fn fetch_plugin_details(id: String) -> Result<PluginDetail, CodeError> {
-    let url = format!("{}/plugins/{}", PLUGIN_API_BASE, id);
+    let url = format!("{PLUGIN_API_BASE}/plugins/{id}");
     let res = HTTP_CLIENT.get(&url).send().await?;
     let detail: PluginDetail = serde_json::from_str(&res.text().await?)?;
     Ok(detail)
@@ -99,7 +97,7 @@ async fn fetch_plugin_details(id: String) -> Result<PluginDetail, CodeError> {
 pub async fn update_code() -> Result<(), CodeError> {
     let product_code = load_product().await?;
     let plugin_code = load_plugin().await?;
-    let code = format!("{},{}", product_code, plugin_code);
+    let code = format!("{product_code},{plugin_code}");
     let mut file = File::create(CODE_FILE_PATH)?;
     file.write_all(code.as_bytes())?;
     file.flush()?;

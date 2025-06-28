@@ -61,7 +61,7 @@ fn process_block_encode(
 }
 
 fn variant_base64_encode(bytes: &[u8]) -> Vec<u8> {
-    let result_len = (bytes.len() * 4 + 2) / 3;
+    let result_len = (bytes.len() * 4).div_ceil(3);
     let mut result = Vec::with_capacity(result_len);
 
     for i in (0..bytes.len()).step_by(3) {
@@ -82,6 +82,7 @@ fn build_license_code(config: &MobaXterm) -> anyhow::Result<Vec<u8>> {
     } = config;
     let (major, minor) = parse_version(version)?;
     let license_type = license_type.to_int();
+    // 后面的#0#0#0#可以删除
     let license_string =
         format!("{license_type}#{username}|{major}{minor}#{count}#{major}3{minor}6{minor}#0#0#0#");
     let encrypted_code = encrypt_decrypt_bytes(&mut 0x787, &license_string.into_bytes(), true);
