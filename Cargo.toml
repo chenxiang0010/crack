@@ -3,7 +3,7 @@ description  = "不可描述的功能"
 edition      = "2024"
 name         = "crack"
 rust-version = "1.85.0"
-version      = "0.2.0"
+version      = "1.0.0"
 
 [dependencies]
 anyhow      = { version = "1.0.93" }

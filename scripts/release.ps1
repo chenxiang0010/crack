@@ -48,7 +48,7 @@ function Test-GitStatus {
     $status = git status --porcelain
     if ($status) {
         Write-ColorOutput "❌ 工作目录不干净，请先提交或暂存更改：" "Red"
-        git status --short
+        git status --short | Out-Host
         return $false
     }
     return $true
@@ -69,14 +69,13 @@ function Test-TagExists {
 # 运行测试
 function Invoke-Tests {
     Write-ColorOutput "🧪 运行测试..." "Blue"
-    
-    $testResult = cargo test 2>&1
+
+    cargo test | Out-Host
     if ($LASTEXITCODE -ne 0) {
-        Write-ColorOutput "❌ 测试失败：" "Red"
-        Write-Host $testResult
+        Write-ColorOutput "❌ 测试失败" "Red"
         return $false
     }
-    
+
     Write-ColorOutput "✅ 测试通过" "Green"
     return $true
 }
@@ -84,14 +83,13 @@ function Invoke-Tests {
 # 构建Release版本
 function Invoke-Build {
     Write-ColorOutput "🔨 构建Release版本..." "Blue"
-    
-    $buildResult = cargo build --release 2>&1
+
+    cargo build --release | Out-Host
     if ($LASTEXITCODE -ne 0) {
-        Write-ColorOutput "❌ 构建失败：" "Red"
-        Write-Host $buildResult
+        Write-ColorOutput "❌ 构建失败" "Red"
         return $false
     }
-    
+
     Write-ColorOutput "✅ 构建成功" "Green"
     return $true
 }
@@ -164,6 +162,7 @@ function Main {
     
     # 检查Git状态
     if (-not (Test-GitStatus)) {
+        Write-ColorOutput "💡 请先提交或暂存所有更改后再发布" "Yellow"
         exit 1
     }
     
