@@ -1,0 +1,141 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 触发条件：推送以 'v' 开头的标签，如 v1.0.0
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Rust工具链
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        
+    - name: 配置Rust缓存
+      uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: true
+        
+    - name: 构建Release版本
+      run: cargo build --release --verbose
+      
+    - name: 下载并设置UPX
+      run: |
+        # 下载UPX
+        Invoke-WebRequest -Uri "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-win64.zip" -OutFile "upx.zip"
+        # 解压UPX
+        Expand-Archive -Path "upx.zip" -DestinationPath "."
+        # 将UPX添加到PATH
+        $env:PATH += ";$PWD\upx-4.2.2-win64"
+        echo "$PWD\upx-4.2.2-win64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      shell: pwsh
+      
+    - name: 使用UPX压缩可执行文件
+      run: |
+        # 压缩可执行文件
+        upx --best --lzma target/release/crack.exe
+        # 显示压缩后的文件信息
+        Get-ChildItem target/release/crack.exe | Format-Table Name, Length
+      shell: pwsh
+      
+    - name: 准备发布文件
+      run: |
+        # 创建发布目录
+        New-Item -ItemType Directory -Force -Path "release"
+        # 复制可执行文件
+        Copy-Item "target/release/crack.exe" "release/crack-windows-x64.exe"
+        # 复制配置文件示例
+        Copy-Item "config.json" "release/config-example.json" -ErrorAction SilentlyContinue
+        # 创建README
+        @"
+        # Crack - 软件许可证生成工具
+
+        ## 使用方法
+
+        1. 将 crack-windows-x64.exe 重命名为 crack.exe
+        2. 首次运行会自动生成 config.json 配置文件
+        3. 根据需要修改配置文件中的参数
+        4. 运行命令生成许可证：
+           - MobaXterm: crack.exe mobaxterm
+           - JetBrains: crack.exe jetbrains
+
+        ## 配置说明
+
+        请参考 config-example.json 文件进行配置。
+
+        ## 注意事项
+
+        本工具仅供学习和研究使用，请遵守相关法律法规。
+        "@ | Out-File -FilePath "release/README.txt" -Encoding UTF8
+      shell: pwsh
+      
+    - name: 获取标签信息
+      id: tag_info
+      run: |
+        $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
+        echo "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        echo "Tag: $tag"
+      shell: pwsh
+      
+    - name: 创建GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag_info.outputs.tag }}
+        name: Release ${{ steps.tag_info.outputs.tag }}
+        body: |
+          ## 🎉 新版本发布
+
+          ### 📦 下载文件
+          - `crack-windows-x64.exe` - Windows x64 可执行文件（已使用UPX压缩）
+          - `config-example.json` - 配置文件示例
+          - `README.txt` - 使用说明
+
+          ### 🚀 功能特性
+          - 支持生成MobaXterm专业版许可证
+          - 支持生成JetBrains系列IDE许可证
+          - 友好的中文界面和提示
+          - 详细的配置验证和错误提示
+
+          ### 📋 使用方法
+          1. 下载 `crack-windows-x64.exe` 并重命名为 `crack.exe`
+          2. 首次运行会自动生成配置文件
+          3. 根据需要修改配置参数
+          4. 运行相应命令生成许可证
+
+          ### ⚠️ 免责声明
+          本工具仅供学习和研究使用，请遵守相关法律法规。
+
+          ---
+          
+          **构建信息:**
+          - 构建时间: ${{ github.event.head_commit.timestamp }}
+          - 提交哈希: ${{ github.sha }}
+          - Rust版本: stable
+          - 压缩工具: UPX v4.2.2
+        files: |
+          release/crack-windows-x64.exe
+          release/config-example.json
+          release/README.txt
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 显示构建信息
+      run: |
+        echo "🎉 构建完成！"
+        echo "📦 发布文件："
+        Get-ChildItem release/ | Format-Table Name, Length
+        echo "🏷️ 标签: ${{ steps.tag_info.outputs.tag }}"
+        echo "🔗 Release链接: https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag_info.outputs.tag }}"
+      shell: pwsh
