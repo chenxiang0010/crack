@@ -53,7 +53,6 @@ async fn load_product() -> Result<String, CodeError> {
         .json()
         .await
         .context("解析产品数据失败")?;
-
     let product_codes: Vec<String> = products.into_iter().map(|p| p.code).collect();
 
     println!("    ✅ 获取到 {} 个产品代码", product_codes.len());
@@ -183,7 +182,9 @@ pub async fn update_code() -> Result<(), CodeError> {
     println!("  🔄 开始更新产品代码...");
 
     // 并发获取产品代码和插件代码
-    let (product_code, plugin_code) = tokio::try_join!(load_product(), load_plugin())?;
+    let (product_code, plugin_code) = tokio::try_join!(load_product(), load_plugin()).context(
+        "并发获取产品代码和插件代码失败",
+    )?;
 
     // 合并代码
     let combined_code = format!("{product_code},{plugin_code}");

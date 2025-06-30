@@ -7,6 +7,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  VCPKG_ROOT: C:\vcpkg
+  OPENSSL_DIR: C:\vcpkg\installed\x64-windows-static-md
 
 jobs:
   build-and-release:
@@ -20,7 +22,10 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        
+
+    - name: 安装OpenSSL
+      run: vcpkg install openssl:x64-windows-static-md
+
     - name: 配置Rust缓存
       uses: Swatinem/rust-cache@v2
       with:

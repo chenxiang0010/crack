@@ -80,19 +80,6 @@ function Invoke-Tests {
     return $true
 }
 
-# 构建Release版本
-function Invoke-Build {
-    Write-ColorOutput "🔨 构建Release版本..." "Blue"
-
-    cargo build --release | Out-Host
-    if ($LASTEXITCODE -ne 0) {
-        Write-ColorOutput "❌ 构建失败" "Red"
-        return $false
-    }
-
-    Write-ColorOutput "✅ 构建成功" "Green"
-    return $true
-}
 
 # 创建标签
 function New-GitTag {
@@ -168,11 +155,6 @@ function Main {
     
     # 运行测试
     if (-not (Invoke-Tests)) {
-        exit 1
-    }
-    
-    # 构建Release版本
-    if (-not (Invoke-Build)) {
         exit 1
     }
     
