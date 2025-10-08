@@ -1,10 +1,11 @@
 //! CLI命令行接口模块
 //!
 //! 提供命令行参数解析和命令执行功能
+//!
+use clap::{Parser, Subcommand};
 
 use crate::config::Config;
 use crate::{jetbrains, mobaxterm};
-use clap::{Parser, Subcommand};
 
 /// CLI错误类型定义
 #[derive(Debug, thiserror::Error)]

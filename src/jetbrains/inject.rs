@@ -1,7 +1,8 @@
-use super::cert_generator::generate_and_save_cert;
-use super::{constant, xyzr};
 use anyhow::{Context, Result};
 use std::fs;
+
+use super::cert_generator::generate_and_save_cert;
+use super::{constant, xyzr};
 
 pub fn inject() -> Result<()> {
     generate_and_save_cert().with_context(|| "Failed to generate and save certificate")?;

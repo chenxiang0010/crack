@@ -2,9 +2,6 @@
 //!
 //! 负责生成和加密MobaXterm许可证文件
 
-use super::constant::VARIANT_BASE64_DICT;
-use super::util::encrypt_decrypt_bytes;
-use crate::config::MobaXterm;
 use anyhow::{Context, Result, anyhow};
 use regex::Regex;
 use std::collections::HashMap;
@@ -13,6 +10,10 @@ use std::io::Write;
 use std::path::Path;
 use zip::write::FileOptions;
 use zip::{CompressionMethod, ZipWriter};
+
+use super::constant::VARIANT_BASE64_DICT;
+use super::util::encrypt_decrypt_bytes;
+use crate::config::MobaXterm;
 
 /// 构建MobaXterm许可证ZIP文件
 ///

@@ -2,6 +2,9 @@
 //!
 //! 负责生成JetBrains系列IDE的许可证文件和相关证书
 
+use anyhow::{Context, Result};
+use std::fs;
+
 mod cert_generator;
 mod code;
 mod constant;
@@ -10,9 +13,7 @@ mod product_license_generator;
 mod xyzr;
 
 use crate::config::JetBrains;
-use anyhow::{Context, Result};
 use product_license_generator::LicenseInfoReq;
-use std::fs;
 
 /// 生成JetBrains许可证文件
 ///
@@ -53,17 +54,6 @@ async fn generate_license(config: &JetBrains) -> Result<()> {
 /// * `Err(anyhow::Error)` - 生成流程执行失败
 pub async fn run(config: &JetBrains) -> Result<()> {
     println!("🚀 开始JetBrains许可证生成流程");
-
-    // 更新产品代码（如果需要）
-    if config.update_code {
-        println!("  🔄 正在更新产品代码...");
-        code::update_code()
-            .await
-            .with_context(|| "更新产品代码失败")?;
-        println!("  ✅ 产品代码更新完成");
-    } else {
-        println!("  ℹ️  跳过产品代码更新");
-    }
 
     // 注入证书和配置
     println!("  🔐 正在生成证书和配置文件...");

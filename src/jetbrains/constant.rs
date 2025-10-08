@@ -40,8 +40,6 @@ pub(crate) const CA_KEY_FILE_PATH: &str = "output/jetbrains/cert/ca.key";
 pub(crate) const CODE_FILE_PATH: &str = "output/jetbrains/code.txt";
 pub(crate) const LICENSE_FILE_PATH: &str = "output/jetbrains/license.txt";
 pub(crate) const POWER_FILE_PATH: &str = "output/jetbrains/power.conf";
-pub(crate) const PLUGIN_API_BASE: &str = "https://plugins.jetbrains.com/api";
-pub(crate) const PRODUCT_API: &str = "https://data.services.jetbrains.com/products";
 
 lazy_static! {
     pub(crate) static ref HTTP_CLIENT: reqwest::Client = reqwest::Client::builder()

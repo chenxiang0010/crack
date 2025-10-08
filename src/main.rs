@@ -8,6 +8,8 @@
 //! - `config`: 配置文件管理
 //! - `utils`: 通用工具函数
 
+use std::process;
+
 mod cli;
 mod config;
 mod jetbrains;
@@ -15,14 +17,13 @@ mod mobaxterm;
 mod utils;
 
 use config::Config;
-use std::process;
 
 /// 程序错误退出处理函数
 ///
 /// # 参数
 /// * `error` - 实现了Display trait的错误类型
-fn exit_with_error(error: impl std::fmt::Display) -> ! {
-    eprintln!("❌ 错误: {error}");
+fn exit_with_error(error: impl std::fmt::Display + std::fmt::Debug) -> ! {
+    eprintln!("❌ 错误: {:#?}", error);
     process::exit(1);
 }
 
@@ -44,6 +45,6 @@ async fn main() {
 
     // 运行CLI命令
     if let Err(e) = cli::run(&config).await {
-        exit_with_error(format!("命令执行失败: {e}"));
+        exit_with_error(format!("命令执行失败: {:#?}", e));
     }
 }

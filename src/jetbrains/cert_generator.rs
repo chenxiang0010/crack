@@ -1,4 +1,3 @@
-use super::constant::{CA_CERT_FILE_PATH, CA_KEY_FILE_PATH};
 use anyhow::Result;
 use openssl::asn1::Asn1Time;
 use openssl::hash::MessageDigest;
@@ -9,6 +8,8 @@ use openssl::x509::{X509, X509NameBuilder, X509ReqBuilder};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+
+use super::constant::{CA_CERT_FILE_PATH, CA_KEY_FILE_PATH};
 
 #[derive(Debug, thiserror::Error)]
 pub enum CertError {

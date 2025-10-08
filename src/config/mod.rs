@@ -42,8 +42,6 @@ pub struct JetBrains {
     pub assignee_name: String,
     /// 过期时间 (格式: YYYY-MM-DD)
     pub expire_at: String,
-    /// 是否更新产品代码
-    pub update_code: bool,
 }
 
 impl Config {

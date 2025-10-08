@@ -2,12 +2,13 @@
 //!
 //! 负责生成MobaXterm专业版许可证文件
 
+use anyhow::{Context, Result};
+
 mod constant;
 mod encrypt;
 pub mod util;
 
 use crate::config::MobaXterm;
-use anyhow::{Context, Result};
 
 /// 运行MobaXterm许可证生成流程
 ///

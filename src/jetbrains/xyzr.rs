@@ -1,10 +1,11 @@
-use super::constant::{CA_CERT_FILE_PATH, ROOT_CERTIFICATE, Y};
 use anyhow::{Context, Result};
 use num_bigint::{BigUint, ToBigUint};
 use openssl::bn::{BigNum, BigNumContext};
 use openssl::x509::X509;
 use std::fs::File;
 use std::io::Read;
+
+use super::constant::{CA_CERT_FILE_PATH, ROOT_CERTIFICATE, Y};
 
 pub fn load_power_conf() -> Result<String> {
     let mut file =

@@ -1,4 +1,3 @@
-use super::constant::{CA_CERT_FILE_PATH, CA_KEY_FILE_PATH};
 use anyhow::{Context, Result};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
@@ -8,6 +7,8 @@ use openssl::sign::Signer;
 use openssl::x509::X509;
 use serde::{Deserialize, Serialize};
 use std::fs;
+
+use super::constant::{CA_CERT_FILE_PATH, CA_KEY_FILE_PATH};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

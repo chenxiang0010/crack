@@ -24,8 +24,7 @@ const DEFAULT_CONFIG_CONTENT: &str = r#"{
   "jetbrains": {
     "licenseeName": "Developer",
     "assigneeName": "Developer",
-    "expireAt": "2029-12-31",
-    "updateCode": false
+    "expireAt": "2029-12-31"
   }
 }"#;
 
