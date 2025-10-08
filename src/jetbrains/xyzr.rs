@@ -1,4 +1,4 @@
-use super::constant::{CA_CERT_FILE_PATH, ROOT_CERTIFICATE};
+use super::constant::{CA_CERT_FILE_PATH, ROOT_CERTIFICATE, Y};
 use anyhow::{Context, Result};
 use num_bigint::{BigUint, ToBigUint};
 use openssl::bn::{BigNum, BigNumContext};
@@ -7,16 +7,17 @@ use std::fs::File;
 use std::io::Read;
 
 pub fn load_power_conf() -> Result<String> {
-    let mut file = File::open(CA_CERT_FILE_PATH).context("Failed to open certificate file")?;
+    let mut file =
+        File::open(CA_CERT_FILE_PATH).with_context(|| "Failed to open certificate file")?;
     let mut cert_buffer = Vec::new();
     file.read_to_end(&mut cert_buffer)
-        .context("Failed to read certificate file")?;
-    let cert = X509::from_pem(&cert_buffer).context("Failed to parse certificate")?;
+        .with_context(|| "Failed to read certificate file")?;
+    let cert = X509::from_pem(&cert_buffer).with_context(|| "Failed to parse certificate")?;
     let signature_bytes = cert.signature().as_slice();
     let x = BigUint::from_bytes_be(signature_bytes);
-    let y: BigUint = 65537.to_biguint().unwrap();
-    let root_cert =
-        X509::from_pem(ROOT_CERTIFICATE.as_bytes()).context("Failed to parse root certificate")?;
+    let y: BigUint = Y.to_biguint().unwrap();
+    let root_cert = X509::from_pem(ROOT_CERTIFICATE.as_bytes())
+        .with_context(|| "Failed to parse root certificate")?;
     let root_public_key = root_cert.public_key()?;
     let root_rsa = root_public_key.rsa()?;
     let z = BigUint::from_bytes_be(&root_rsa.n().to_vec());

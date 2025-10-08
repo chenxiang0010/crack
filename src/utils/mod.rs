@@ -39,9 +39,9 @@ const DEFAULT_CONFIG_CONTENT: &str = r#"{
 pub fn init() -> Result<()> {
     println!("🔧 正在初始化应用程序环境...");
 
-    init_output_directories().context("创建输出目录失败")?;
+    init_output_directories().with_context(|| "创建输出目录失败")?;
 
-    init_config_file().context("初始化配置文件失败")?;
+    init_config_file().with_context(|| "初始化配置文件失败")?;
 
     println!("✅ 环境初始化完成");
     Ok(())
@@ -78,7 +78,7 @@ fn init_config_file() -> Result<()> {
     let config_file = Path::new("config.json");
 
     if !config_file.exists() {
-        fs::write(config_file, DEFAULT_CONFIG_CONTENT).context("无法写入默认配置文件")?;
+        fs::write(config_file, DEFAULT_CONFIG_CONTENT).with_context(|| "无法写入默认配置文件")?;
 
         println!("📄 创建默认配置文件: {}", config_file.display());
         println!("💡 请根据需要修改配置文件中的参数");

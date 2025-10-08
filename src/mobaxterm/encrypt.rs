@@ -27,18 +27,20 @@ fn build_zip(license: &[u8]) -> Result<()> {
 
     println!("    📦 正在创建许可证文件: {}", output_path.display());
 
-    let file = File::create(output_path).context("创建ZIP文件失败")?;
+    let file = File::create(output_path).with_context(|| "创建ZIP文件失败")?;
 
     let mut zip_file = ZipWriter::new(file);
     let options = FileOptions::<()>::default().compression_method(CompressionMethod::Stored);
 
     zip_file
         .start_file("Pro.key", options)
-        .context("添加许可证到ZIP失败")?;
+        .with_context(|| "添加许可证到ZIP失败")?;
 
-    zip_file.write_all(license).context("写入许可证数据失败")?;
+    zip_file
+        .write_all(license)
+        .with_context(|| "写入许可证数据失败")?;
 
-    zip_file.finish().context("完成ZIP文件创建失败")?;
+    zip_file.finish().with_context(|| "完成ZIP文件创建失败")?;
 
     println!("    ✅ 许可证文件创建完成");
     Ok(())
@@ -53,7 +55,7 @@ fn build_zip(license: &[u8]) -> Result<()> {
 /// * `Ok((主版本, 次版本))` - 解析成功
 /// * `Err(anyhow::Error)` - 版本格式无效
 fn parse_version(version: &str) -> Result<(&str, &str)> {
-    let version_regex = Regex::new(r"^\d+\.\d+$").context("创建版本号正则表达式失败")?;
+    let version_regex = Regex::new(r"^\d+\.\d+$").with_context(|| "创建版本号正则表达式失败")?;
 
     if !version_regex.is_match(version) {
         return Err(anyhow!(
@@ -157,7 +159,7 @@ fn build_license_code(config: &MobaXterm) -> Result<Vec<u8>> {
     } = config;
 
     // 解析版本号
-    let (major, minor) = parse_version(version).context("版本号解析失败")?;
+    let (major, minor) = parse_version(version).with_context(|| "版本号解析失败")?;
 
     // 获取许可证类型数值
     let license_type_int = license_type.to_int();
@@ -190,14 +192,14 @@ fn build_license_code(config: &MobaXterm) -> Result<Vec<u8>> {
 /// # 返回值
 /// * `Ok(())` - 加密成功
 /// * `Err(anyhow::Error)` - 加密失败
-pub fn encrypt(config: &MobaXterm) -> Result<()> {
+pub fn entry(config: &MobaXterm) -> Result<()> {
     println!("  🔐 开始许可证加密流程...");
 
     // 构建许可证代码
-    let license_code = build_license_code(config).context("许可证代码构建失败")?;
+    let license_code = build_license_code(config).with_context(|| "许可证代码构建失败")?;
 
     // 创建ZIP文件
-    build_zip(&license_code).context("许可证文件创建失败")?;
+    build_zip(&license_code).with_context(|| "许可证文件创建失败")?;
 
     println!("  ✅ 许可证加密完成");
     Ok(())

@@ -25,7 +25,7 @@ use std::fs;
 async fn generate_license(config: &JetBrains) -> Result<()> {
     println!("  📝 正在生成许可证文件...");
 
-    let product_code = code::get_code().context("获取产品代码失败")?;
+    let product_code = code::get_code().with_context(|| "获取产品代码失败")?;
 
     let license_info = LicenseInfoReq {
         licensee_name: config.licensee_name.clone(),
@@ -35,9 +35,9 @@ async fn generate_license(config: &JetBrains) -> Result<()> {
     };
 
     let license_code = product_license_generator::generate_license_code(license_info)
-        .context("生成许可证代码失败")?;
+        .with_context(|| "生成许可证代码失败")?;
 
-    fs::write(constant::LICENSE_FILE_PATH, license_code).context("写入许可证文件失败")?;
+    fs::write(constant::LICENSE_FILE_PATH, license_code).with_context(|| "写入许可证文件失败")?;
 
     println!("  ✅ 许可证文件生成完成: {}", constant::LICENSE_FILE_PATH);
     Ok(())
@@ -57,7 +57,9 @@ pub async fn run(config: &JetBrains) -> Result<()> {
     // 更新产品代码（如果需要）
     if config.update_code {
         println!("  🔄 正在更新产品代码...");
-        code::update_code().await.context("更新产品代码失败")?;
+        code::update_code()
+            .await
+            .with_context(|| "更新产品代码失败")?;
         println!("  ✅ 产品代码更新完成");
     } else {
         println!("  ℹ️  跳过产品代码更新");
@@ -65,11 +67,13 @@ pub async fn run(config: &JetBrains) -> Result<()> {
 
     // 注入证书和配置
     println!("  🔐 正在生成证书和配置文件...");
-    inject::inject().context("证书和配置注入失败")?;
+    inject::inject().with_context(|| "证书和配置注入失败")?;
     println!("  ✅ 证书和配置文件生成完成");
 
     // 生成许可证
-    generate_license(config).await.context("许可证生成失败")?;
+    generate_license(config)
+        .await
+        .with_context(|| "许可证生成失败")?;
 
     println!("\n🎉 JetBrains许可证生成完成！");
     println!("📋 请将以下文件复制到您的IDE安装目录：");

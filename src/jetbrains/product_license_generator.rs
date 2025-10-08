@@ -1,7 +1,7 @@
 use super::constant::{CA_CERT_FILE_PATH, CA_KEY_FILE_PATH};
 use anyhow::{Context, Result};
-use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
+use base64::engine::general_purpose::STANDARD;
 use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::sign::Signer;
@@ -74,11 +74,12 @@ pub struct LicenseInfoReq {
 }
 
 pub fn generate_license_code(license_info_req: LicenseInfoReq) -> Result<String> {
-    let cert = fs::read_to_string(CA_CERT_FILE_PATH).context("Failed to read certificate file")?;
-    let cert = X509::from_pem(cert.as_bytes()).context("Failed to parse certificate")?;
+    let cert =
+        fs::read_to_string(CA_CERT_FILE_PATH).with_context(|| "Failed to read certificate file")?;
+    let cert = X509::from_pem(cert.as_bytes()).with_context(|| "Failed to parse certificate")?;
     let license_info = LicenseInfo::new(&license_info_req);
     let license_part =
-        serde_json::to_string(&license_info).context("Failed to serialize license info")?;
+        serde_json::to_string(&license_info).with_context(|| "Failed to serialize license info")?;
     let license_part_base64 = STANDARD.encode(license_part.as_bytes());
     let key_data = fs::read(CA_KEY_FILE_PATH)?;
     let private_key = PKey::private_key_from_pem(&key_data)?;

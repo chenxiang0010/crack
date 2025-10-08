@@ -34,6 +34,7 @@ FeU3FZ+Bcp12t7dlM4E0/sS1XdL47CfGVj4Bp+/VbF862HmkAbd7shs7sDQkHbU=
 -----END CERTIFICATE-----
 "#;
 
+pub(crate) const Y: i32 = 65537;
 pub(crate) const CA_CERT_FILE_PATH: &str = "output/jetbrains/cert/ca.crt";
 pub(crate) const CA_KEY_FILE_PATH: &str = "output/jetbrains/cert/ca.key";
 pub(crate) const CODE_FILE_PATH: &str = "output/jetbrains/code.txt";

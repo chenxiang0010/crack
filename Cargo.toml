@@ -2,8 +2,8 @@
 description  = "不可描述的功能"
 edition      = "2024"
 name         = "crack"
-rust-version = "1.85.0"
-version      = "1.0.0"
+rust-version = "1.90.0"
+version      = "1.1.0"
 
 [dependencies]
 anyhow      = { version = "1.0.93" }
@@ -19,7 +19,7 @@ serde       = { version = "1.0", features = ["derive"] }
 serde_json  = { version = "1.0" }
 thiserror   = { version = "2.0.11" }
 tokio       = { version = "1.41", features = ["macros", "rt-multi-thread"] }
-zip         = { version = "4.2.0" }
+zip         = { version = "5.1.1" }
 
 [profile.release]
 codegen-units = 1

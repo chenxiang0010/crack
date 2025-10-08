@@ -49,10 +49,10 @@ async fn load_product() -> Result<String, CodeError> {
         .get(&url)
         .send()
         .await
-        .context("请求产品API失败")?
+        .with_context(|| "请求产品API失败")?
         .json()
         .await
-        .context("解析产品数据失败")?;
+        .with_context(|| "解析产品数据失败")?;
     let product_codes: Vec<String> = products.into_iter().map(|p| p.code).collect();
 
     println!("    ✅ 获取到 {} 个产品代码", product_codes.len());
@@ -123,9 +123,12 @@ async fn fetch_plugins(pricing_model: &str) -> Result<Vec<Value>, CodeError> {
         .get(&url)
         .send()
         .await
-        .context("请求插件列表失败")?;
+        .with_context(|| "请求插件列表失败")?;
 
-    let data: Value = response.json().await.context("解析插件列表响应失败")?;
+    let data: Value = response
+        .json()
+        .await
+        .with_context(|| "解析插件列表响应失败")?;
 
     data["plugins"]
         .as_array()
@@ -162,11 +165,14 @@ async fn fetch_plugin_details(id: String) -> Result<PluginDetail, CodeError> {
         .get(&url)
         .send()
         .await
-        .context("请求插件详情失败")?;
+        .with_context(|| "请求插件详情失败")?;
 
-    let text = response.text().await.context("读取插件详情响应失败")?;
+    let text = response
+        .text()
+        .await
+        .with_context(|| "读取插件详情响应失败")?;
 
-    let detail: PluginDetail = serde_json::from_str(&text).context("解析插件详情失败")?;
+    let detail: PluginDetail = serde_json::from_str(&text).with_context(|| "解析插件详情失败")?;
 
     Ok(detail)
 }
@@ -182,21 +188,20 @@ pub async fn update_code() -> Result<(), CodeError> {
     println!("  🔄 开始更新产品代码...");
 
     // 并发获取产品代码和插件代码
-    let (product_code, plugin_code) = tokio::try_join!(load_product(), load_plugin()).context(
-        "并发获取产品代码和插件代码失败",
-    )?;
+    let (product_code, plugin_code) = tokio::try_join!(load_product(), load_plugin())
+        .with_context(|| "并发获取产品代码和插件代码失败")?;
 
     // 合并代码
     let combined_code = format!("{product_code},{plugin_code}");
 
     // 保存到文件
     println!("  💾 正在保存产品代码到文件...");
-    let mut file = File::create(CODE_FILE_PATH).context("创建产品代码文件失败")?;
+    let mut file = File::create(CODE_FILE_PATH).with_context(|| "创建产品代码文件失败")?;
 
     file.write_all(combined_code.as_bytes())
-        .context("写入产品代码失败")?;
+        .with_context(|| "写入产品代码失败")?;
 
-    file.flush().context("刷新文件缓冲区失败")?;
+    file.flush().with_context(|| "刷新文件缓冲区失败")?;
 
     println!("  ✅ 产品代码更新完成，保存至: {}", CODE_FILE_PATH);
     Ok(())
@@ -208,7 +213,7 @@ pub async fn update_code() -> Result<(), CodeError> {
 /// * `Ok(String)` - 产品代码字符串
 /// * `Err(CodeError)` - 读取失败
 pub fn get_code() -> Result<String, CodeError> {
-    let code = fs::read_to_string(CODE_FILE_PATH).context("读取产品代码文件失败")?;
+    let code = fs::read_to_string(CODE_FILE_PATH).with_context(|| "读取产品代码文件失败")?;
 
     if code.trim().is_empty() {
         return Err(CodeError::ApiError(
