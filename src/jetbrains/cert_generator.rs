@@ -77,7 +77,7 @@ fn save_cert_and_key(cert: X509, priv_key_pem: Vec<u8>) -> Result<(), CertError>
         std::fs::create_dir_all(key_dir)?;
     }
     let mut file = File::create(CA_CERT_FILE_PATH)?;
-    file.write_all(&cert.to_pem().map_err(CertError::RsaGeneration)?)?;
+    file.write_all(&cert.to_pem()?)?;
     let mut file = File::create(CA_KEY_FILE_PATH)?;
     file.write_all(&priv_key_pem)?;
     Ok(())

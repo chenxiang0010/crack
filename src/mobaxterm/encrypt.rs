@@ -3,15 +3,13 @@
 //! 负责生成和加密MobaXterm许可证文件
 
 use anyhow::{Context, Result, anyhow};
-use regex::Regex;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use zip::write::FileOptions;
 use zip::{CompressionMethod, ZipWriter};
 
-use super::constant::VARIANT_BASE64_DICT;
+use super::constant::VARIANT_BASE64_TABLE;
 use super::util::encrypt_decrypt_bytes;
 use crate::config::MobaXterm;
 
@@ -56,20 +54,21 @@ fn build_zip(license: &[u8]) -> Result<()> {
 /// * `Ok((主版本, 次版本))` - 解析成功
 /// * `Err(anyhow::Error)` - 版本格式无效
 fn parse_version(version: &str) -> Result<(&str, &str)> {
-    let version_regex = Regex::new(r"^\d+\.\d+$").with_context(|| "创建版本号正则表达式失败")?;
+    let mut parts = version.split('.');
+    let (Some(major), Some(minor), None) = (parts.next(), parts.next(), parts.next()) else {
+        return Err(anyhow!(
+            "版本号格式无效，应为 '主版本.次版本' 格式，如 '23.1'"
+        ));
+    };
 
-    if !version_regex.is_match(version) {
+    let is_digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
+    if !is_digits(major) || !is_digits(minor) {
         return Err(anyhow!(
             "版本号格式无效，应为 '主版本.次版本' 格式，如 '23.1'"
         ));
     }
 
-    let parts: Vec<&str> = version.split('.').collect();
-    if parts.len() != 2 {
-        return Err(anyhow!("版本号格式错误"));
-    }
-
-    Ok((parts[0], parts[1]))
+    Ok((major, minor))
 }
 
 /// 处理单个数据块的Base64编码
@@ -77,7 +76,7 @@ fn parse_version(version: &str) -> Result<(&str, &str)> {
 /// # 参数
 /// * `start_index` - 起始索引
 /// * `byte_count` - 字节数量
-/// * `base64_dict` - Base64字符映射表
+/// * `base64_table` - Base64字符表
 /// * `bytes` - 原始字节数据
 ///
 /// # 返回值
@@ -85,7 +84,7 @@ fn parse_version(version: &str) -> Result<(&str, &str)> {
 fn process_block_encode(
     start_index: usize,
     byte_count: usize,
-    base64_dict: &HashMap<usize, char>,
+    base64_table: &[u8],
     bytes: &[u8],
 ) -> Vec<u8> {
     // 将字节数据转换为32位整数
@@ -104,13 +103,13 @@ fn process_block_encode(
     };
 
     // 生成编码块
-    let mut block = String::with_capacity(step_count);
+    let mut block = Vec::with_capacity(step_count);
     for i in 0..step_count {
         let index = ((coding_int >> (i * 6)) & 0x3F) as usize;
-        block.push(base64_dict[&index]);
+        block.push(base64_table[index]);
     }
 
-    block.into_bytes()
+    block
 }
 
 /// 变体Base64编码
@@ -134,7 +133,7 @@ fn variant_base64_encode(bytes: &[u8]) -> Vec<u8> {
     // 按3字节为一组进行编码
     for i in (0..bytes.len()).step_by(3) {
         let chunk_size = std::cmp::min(3, bytes.len() - i);
-        let block = process_block_encode(i, chunk_size, &VARIANT_BASE64_DICT, bytes);
+        let block = process_block_encode(i, chunk_size, VARIANT_BASE64_TABLE, bytes);
         result.extend_from_slice(&block);
     }
 

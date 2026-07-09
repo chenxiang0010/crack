@@ -63,10 +63,11 @@ fn init_output_directories() -> Result<()> {
 /// * `path` - 目录路径
 fn create_directory_if_not_exists<P: AsRef<Path>>(path: P) -> Result<()> {
     let path = path.as_ref();
-    if !path.exists() {
-        fs::create_dir_all(path).with_context(|| format!("无法创建目录: {}", path.display()))?;
-        println!("📁 创建目录: {}", path.display());
+    if path.exists() {
+        return Ok(());
     }
+    fs::create_dir_all(path).with_context(|| format!("无法创建目录: {}", path.display()))?;
+    println!("📁 创建目录: {}", path.display());
     Ok(())
 }
 

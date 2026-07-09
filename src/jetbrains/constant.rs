@@ -1,4 +1,4 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 use std::time::Duration;
 
 pub(crate) const ROOT_CERTIFICATE: &str = r#"
@@ -41,9 +41,11 @@ pub(crate) const CODE_FILE_PATH: &str = "output/jetbrains/code.txt";
 pub(crate) const LICENSE_FILE_PATH: &str = "output/jetbrains/license.txt";
 pub(crate) const POWER_FILE_PATH: &str = "output/jetbrains/power.conf";
 
-lazy_static! {
-    pub(crate) static ref HTTP_CLIENT: reqwest::Client = reqwest::Client::builder()
+// 预留给联网获取产品码的功能，目前产品码从本地 code.txt 读取，暂未接入。
+#[allow(dead_code)]
+pub(crate) static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
+    reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
         .build()
-        .expect("Failed to create HTTP client");
-}
+        .expect("Failed to create HTTP client")
+});

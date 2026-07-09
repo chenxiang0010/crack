@@ -16,13 +16,6 @@ pub enum CliError {
     Jetbrains(anyhow::Error),
 }
 
-impl From<anyhow::Error> for CliError {
-    fn from(err: anyhow::Error) -> Self {
-        // 根据错误信息判断来源，这里简化处理
-        CliError::Jetbrains(err)
-    }
-}
-
 /// 软件许可证生成工具
 ///
 /// 支持生成MobaXterm和JetBrains系列软件的许可证文件

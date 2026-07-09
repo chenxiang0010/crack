@@ -106,7 +106,7 @@ impl Config {
         }
 
         // 验证日期格式 (简单验证)
-        if !self.jetbrains.expire_at.matches('-').count() == 2 {
+        if self.jetbrains.expire_at.matches('-').count() != 2 {
             return Err(anyhow::anyhow!(
                 "JetBrains过期时间格式错误，应为 YYYY-MM-DD 格式"
             ));
